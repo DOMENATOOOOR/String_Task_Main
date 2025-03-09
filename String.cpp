@@ -60,7 +60,7 @@ String::String(size_t n, char c)
         }
 
     };
-String::String(const String& str)//копирование
+String::String(const String& str)
     {
         refCount_ = str.refCount_;
         size_ = str.size_;
@@ -68,7 +68,7 @@ String::String(const String& str)//копирование
         data_ = str.data_;
         ++(*refCount_);
     };
-String::String(const String& str, size_t pos, size_t len)//копирование начиная с какой-то позиции до конца либо до определенного конца
+String::String(const String& str, size_t pos, size_t len)
     {
         refCount_ = new size_t(1);
         if (pos > str.size_)
