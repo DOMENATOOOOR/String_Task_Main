@@ -18,7 +18,6 @@ int main() {
     String str5;
     str5 = str4.substr(2, 2);
     std::cout<<str2.data()<< std::endl;
-    str2.insert(2, "I am sexy and I know it!");
     str1.clear();
     str2.clear();
     str3.clear();
