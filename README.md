@@ -1,2 +1,2 @@
 # String_Task_Main
-все пока что находится в String.h
+googletest находятся у меня в папке third_party, которой тут нет
