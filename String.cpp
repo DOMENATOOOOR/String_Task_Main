@@ -6,8 +6,6 @@ String::String()
     size_ = 0;
     capacity_ = 0;
     data_ = nullptr;
-    void detach(char*& data);
-    void detach_1();
 };
 
 
