@@ -9,9 +9,10 @@ private:
     size_t size_;
     size_t capacity_;
     size_t *refCount_;
+    void detach(char*& data);
+    void detach_1();
 
 public:
-
     String();
     String(const char* str);
     String(const char* str, size_t n);
@@ -20,25 +21,25 @@ public:
     String(const String& str, size_t pos, size_t len = npos);
     ~String();
 
-    size_t size();
+    [[nodiscard]] size_t size() const;
 
-    size_t capacity();
+    [[nodiscard]] size_t capacity() const;
 
     void reserve(size_t n = 0);
     void clear();
-    bool empty();
+    [[nodiscard]] bool empty() const;
 
     char& at(size_t pos);
-    const char& at(size_t pos) const;
+    [[nodiscard]] const char& at(size_t pos) const;
 
     char& operator[](size_t pos);
     const char& operator[](size_t pos) const;
 
     char& back();
-    const char& back() const;
+    [[nodiscard]] const char& back() const;
 
     char& front();
-    const char& front() const;
+    [[nodiscard]] const char& front() const;
 
     String& operator+=(const String& str);
     String& operator+=(const char* str);
@@ -65,7 +66,7 @@ public:
 
     String substr(size_t pos = 0, size_t len = npos);
 
-    int compare(const String& str);
+    [[nodiscard]] int compare(const String& str) const;
 
     size_t countRef();
 
