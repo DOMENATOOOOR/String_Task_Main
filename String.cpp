@@ -1,13 +1,16 @@
 #include "String.h"
-
+#include <cstring>
 String::String()
 {
     refCount_ = new size_t(1);
     size_ = 0;
     capacity_ = 0;
     data_ = nullptr;
-
+    void detach(char*& data);
+    void detach_1();
 };
+
+
 String::String(const char* str) {
     if (str)
     {
@@ -60,7 +63,7 @@ String::String(size_t n, char c)
         }
 
     };
-String::String(const String& str)
+String::String(const String& str)//копирование
     {
         refCount_ = str.refCount_;
         size_ = str.size_;
@@ -68,7 +71,7 @@ String::String(const String& str)
         data_ = str.data_;
         ++(*refCount_);
     };
-String::String(const String& str, size_t pos, size_t len)
+String::String(const String& str, size_t pos, size_t len)//копирование начиная с какой-то позиции до конца либо до определенного конца
     {
         refCount_ = new size_t(1);
         if (pos > str.size_)
@@ -105,12 +108,12 @@ String::~String() {
         }
     };
 
-size_t String::size()
+size_t String::size() const
     {
         return size_;
     };
 
-size_t String::capacity()
+size_t String::capacity() const
     {
         return capacity_;
     };
@@ -139,9 +142,7 @@ void String::reserve(size_t n)
                     data_[size_] = '\0';
                 }
             }
-            new_data_ = new char[0];
-            delete[] new_data_;
-            new_data_ = nullptr;
+            detach(new_data_);
         }
     };
 void String::clear()
@@ -164,7 +165,7 @@ void String::clear()
             data_ = nullptr;
         }
     };
-bool String::empty()
+bool String::empty() const
     {
         return size_ == 0;
     };
@@ -220,16 +221,9 @@ String& String::operator+=(const String& str)
         }
         else
         {
-            --(*refCount_);
-            refCount_ = new size_t(1);
-            char* new_data_ = data_;
-            data_ = new char[capacity_];
-            std::strcpy(data_, new_data_);
+            detach_1();
             this->reserve(size_ + str.size_);
             std::strcat(data_, str.data_);
-            new_data_ = new char[0];
-            delete[] new_data_;
-            new_data_ = nullptr;
         }
         return *this;
         };
@@ -242,16 +236,9 @@ String& String::operator+=(const char* str)
         }
         else
         {
-            --(*refCount_);
-            refCount_ = new size_t(1);
-            char* new_data_ = data_;
-            data_ = new char[capacity_];
-            std::strcpy(data_, new_data_);
+            detach_1();
             this->reserve(size_ + std::strlen(str));
             std::strcat(data_, str);
-            new_data_ = new char[0];
-            delete[] new_data_;
-            new_data_ = nullptr;
         }
         return *this;
     };
@@ -264,17 +251,10 @@ String& String::operator+=(char c)
             data_[size_] = '\0';
         }
         else {
-            --(*refCount_);
-            refCount_ = new size_t(1);
-            char* new_data_ = data_;
-            data_ = new char[capacity_];
-            std::strcpy(data_, new_data_);
+            detach_1();
             this->reserve(size_ + 1);
             data_[size_-1] = c;
             data_[size_] = '\0';
-            new_data_ = new char[0];
-            delete[] new_data_;
-            new_data_ = nullptr;
         }
         return *this;
     };
@@ -339,17 +319,10 @@ String& String::insert(size_t pos, const String&  str)
         }
         else
         {
-            --(*refCount_);
-            refCount_ = new size_t(1);
-            char* new_data_ = data_;
-            data_ = new char[capacity_];
-            std::strcpy(data_, new_data_);
+            detach_1();
             this->reserve(size_ + str.size_);
             std::memmove(data_ + pos + str.size_, data_ + pos, size_ - str.size_ - pos + 1);
             std::memcpy(data_ + pos, str.data_, str.size_);
-            new_data_ = new char[0];
-            delete[] new_data_;
-            new_data_ = nullptr;
         }
         return *this;
 
@@ -367,17 +340,10 @@ String& String::insert(size_t pos, const char* str)
         }
         else
         {
-            --(*refCount_);
-            refCount_ = new size_t(1);
-            char* new_data_ = data_;
-            data_ = new char[capacity_];
-            std::strcpy(data_, new_data_);
+            detach_1();
             this->reserve(size_ + str_size_);
             std::memmove(data_ + pos + str_size_, data_ + pos, size_ - str_size_ - pos + 1);
             std::memcpy(data_ + pos, str, str_size_);
-            new_data_ = new char[0];
-            delete[] new_data_;
-            new_data_ = nullptr;
         }
         return *this;
     };
@@ -396,18 +362,13 @@ String& String::erase(size_t pos, size_t len)
             delete [] data_;
             data_ = new char[new_size_ + 1];
             std::strcpy(data_, new_data_);
-            delete [] new_data_;
-            new_data_ = nullptr;
+            detach(new_data_);
             size_ -= len;
             capacity_ = size_ + 1;
         }
         else
         {
-            --(*refCount_);
-            refCount_ = new size_t(1);
-            char* new_data_copy = data_;
-            data_ = new char[capacity_];
-            std::strcpy(data_, new_data_copy);
+            detach_1();
             std::memmove(data_ + pos, data_ + pos + len, size_ - len - pos + 1);
             size_t new_size_ = size_ - len;
             char* new_data_ = new char[new_size_ + 1];
@@ -416,13 +377,9 @@ String& String::erase(size_t pos, size_t len)
             delete [] data_;
             data_ = new char[new_size_ + 1];
             std::strcpy(data_, new_data_);
-            delete [] new_data_;
-            new_data_ = nullptr;
+            detach(new_data_);
             size_ -= len;
             capacity_ = size_ + 1;
-            new_data_copy = new char[0];
-            delete [] new_data_copy;
-            new_data_copy = nullptr;
         }
 
         return *this;
@@ -442,20 +399,11 @@ String& String::replace(size_t pos, size_t len, const String& str)
                 data_ = newData;
                 size_ = new_size_;
                 capacity_ = size_ + 1;
-                newData = new char[0];
-                delete[] newData;
-                newData = nullptr;
+                detach(newData);
             }
             else
             {
-                --(*refCount_);
-                refCount_ = new size_t(1);
-                char* new_data_ = data_;
-                data_ = new char[capacity_];
-                std::strcpy(data_, new_data_);
-                new_data_ = new char[0];
-                delete[] new_data_;
-                new_data_ = nullptr;
+                detach_1();
                 char* newData = new char[new_size_ + 1];
                 std::strncpy(newData, data_, pos);
                 std::strcpy(newData + pos, str.data_);
@@ -463,9 +411,7 @@ String& String::replace(size_t pos, size_t len, const String& str)
                 data_ = newData;
                 size_ = new_size_;
                 capacity_ = size_ + 1;
-                newData = new char[0];
-                delete[] newData;
-                newData = nullptr;
+                detach(newData);
             }
         return *this;
     };
@@ -485,20 +431,11 @@ String& String::replace(size_t pos, size_t len, const char* str)
             data_ = newData;
             size_ = new_size_;
             capacity_ = size_ + 1;
-            newData = new char[0];
-            delete[] newData;
-            newData = nullptr;
+            detach(newData);
         }
         else
         {
-            --(*refCount_);
-            refCount_ = new size_t(1);
-            char* new_data_ = data_;
-            data_ = new char[capacity_];
-            std::strcpy(data_, new_data_);
-            new_data_ = new char[0];
-            delete[] new_data_;
-            new_data_ = nullptr;
+            detach_1();
             char* newData = new char[new_size_ + 1];
             std::strncpy(newData, data_, pos);
             std::strcpy(newData + pos, str);
@@ -506,9 +443,7 @@ String& String::replace(size_t pos, size_t len, const char* str)
             data_ = newData;
             size_ = new_size_;
             capacity_ = size_ + 1;
-            newData = new char[0];
-            delete[] newData;
-            newData = nullptr;
+            detach(newData);
         }
         return *this;
     };
@@ -526,20 +461,11 @@ String& String::replace(size_t pos, size_t len, size_t n, char c)
             data_ = newData;
             size_ = new_size_;
             capacity_ = size_ + 1;
-            newData = new char[0];
-            delete[] newData;
-            newData = nullptr;
+            detach(newData);
         }
         else
         {
-            --(*refCount_);
-            refCount_ = new size_t(1);
-            char* new_data_ = data_;
-            data_ = new char[capacity_];
-            std::strcpy(data_, new_data_);
-            new_data_ = new char[0];
-            delete[] new_data_;
-            new_data_ = nullptr;
+            detach_1();
             char* newData = new char[new_size_ + 1];
             std::strncpy(newData, data_, pos);
             std::memset(newData + pos, c, n);
@@ -547,9 +473,7 @@ String& String::replace(size_t pos, size_t len, size_t n, char c)
             data_ = newData;
             size_ = new_size_;
             capacity_ = size_ + 1;
-            newData = new char[0];
-            delete[] newData;
-            newData = nullptr;
+            detach(newData);
         }
         return *this;
     };
@@ -597,14 +521,27 @@ String String::substr(size_t pos, size_t len)
         return {data_ + pos, len};
     };
 
-int String::compare(const String& str)
+int String::compare(const String& str) const
     {
-        if (size_ > str.size_) return 1;
-        else if (size_ < str.size_) return -1;
-        return 0;
+        return strcmp(data_, str.data_);
     };
 
 size_t String::countRef()
     {
         return *refCount_;
     };
+
+void String::detach(char*& data) {
+    data = new char[0];
+    delete[] data;
+    data = nullptr;
+}
+
+void String::detach_1() {
+    --(*refCount_);
+    refCount_ = new size_t(1);
+    char* new_data_ = data_;
+    data_ = new char[capacity_];
+    std::strcpy(data_, new_data_);
+    detach(new_data_);
+}
