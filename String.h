@@ -9,8 +9,7 @@ private:
     size_t size_;
     size_t capacity_;
     size_t *refCount_;
-    void detach(char*& data);
-    void detach_1();
+    void detach();
 
 public:
     String();
@@ -21,25 +20,25 @@ public:
     String(const String& str, size_t pos, size_t len = npos);
     ~String();
 
-    [[nodiscard]] size_t size() const;
+    size_t size() const;
 
-    [[nodiscard]] size_t capacity() const;
+    size_t capacity() const;
 
     void reserve(size_t n = 0);
     void clear();
-    [[nodiscard]] bool empty() const;
+    bool empty() const;
 
     char& at(size_t pos);
-    [[nodiscard]] const char& at(size_t pos) const;
+    const char& at(size_t pos) const;
 
     char& operator[](size_t pos);
     const char& operator[](size_t pos) const;
 
     char& back();
-    [[nodiscard]] const char& back() const;
+    const char& back() const;
 
     char& front();
-    [[nodiscard]] const char& front() const;
+    const char& front() const;
 
     String& operator+=(const String& str);
     String& operator+=(const char* str);
@@ -58,17 +57,17 @@ public:
     String& replace(size_t pos, size_t len, size_t n, char c);
 
     void swap(String& str);
-    const char* data();
+    const char* data() const;
 
-    size_t find(const String& str, size_t pos = 0);
-    size_t find(const char* str, size_t pos = 0);
-    size_t find(char c, size_t pos = 0);
+    size_t find(const String& str, size_t pos = 0) const;
+    size_t find(const char* str, size_t pos = 0) const;
+    size_t find(char c, size_t pos = 0) const;
 
     String substr(size_t pos = 0, size_t len = npos);
 
-    [[nodiscard]] int compare(const String& str) const;
+    int compare(const String& str) const;
 
-    size_t countRef();
+    size_t countRef() const;
 
     static const size_t npos = -1;
 };
